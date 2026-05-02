@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>동기 직장 지도</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">ㄷ</span>
+          <div>
+            <h1>동기 직장 지도</h1>
+            <p>대학원 동기들의 근무지를 한눈에 확인하세요.</p>
+          </div>
+        </div>
+        <div class="api-control">
+          <label for="apiKey">Kakao JavaScript 키</label>
+          <div class="api-row">
+            <input id="apiKey" type="password" placeholder="Kakao JavaScript 키 입력" autocomplete="off" />
+            <button id="saveKey" class="ghost-button" type="button">적용</button>
+          </div>
+          <p class="api-help">키를 적용하면 실제 Kakao Maps 지도로 전환됩니다.</p>
+        </div>
+      </header>
+
+      <section class="workspace" aria-label="동기 직장 지도 앱">
+        <aside class="roster-panel">
+          <div class="panel-heading">
+            <div>
+              <span class="section-label">등록된 동기</span>
+              <strong id="countText">0명</strong>
+            </div>
+            <button id="resetData" class="icon-button" type="button" aria-label="샘플로 초기화" title="샘플로 초기화">
+              <span aria-hidden="true">↻</span>
+            </button>
+          </div>
+
+          <label class="search-box" for="searchInput">
+            <span aria-hidden="true">⌕</span>
+            <input id="searchInput" type="search" placeholder="이름 또는 직장 검색" />
+          </label>
+
+          <div id="peopleList" class="people-list" aria-live="polite"></div>
+        </aside>
+
+        <section class="map-panel">
+          <div id="map" class="map-canvas" aria-label="직장 위치 지도">
+            <div id="fallbackMap" class="fallback-map"></div>
+          </div>
+          <div class="map-toolbar">
+            <button id="fitAll" class="ghost-button" type="button">전체 보기</button>
+            <span id="mapStatus">API 키 미적용: 데모 지도 사용 중</span>
+          </div>
+        </section>
+
+        <aside class="detail-panel">
+          <div class="selected-person" id="selectedPerson"></div>
+
+          <form id="personForm" class="entry-form">
+            <div class="form-title">
+              <h2>직장 등록</h2>
+              <p>성명과 직장 정보를 등록하면 해당 위치가 표시됩니다.</p>
+            </div>
+            <label>
+              <span>성명</span>
+              <input id="nameInput" name="name" required placeholder="예: 김민준" />
+            </label>
+            <label>
+              <span>직장명</span>
+              <input id="companyInput" name="company" required placeholder="예: 카카오" />
+            </label>
+            <label>
+              <span>주소</span>
+              <input id="addressInput" name="address" required placeholder="예: 경기도 성남시 분당구 판교역로 166" />
+            </label>
+            <button class="primary-button" type="submit">등록</button>
+            <p id="formMessage" class="form-message" role="status"></p>
+          </form>
+        </aside>
+      </section>
+    </main>
+    <script src="./app.js"></script>
+  </body>
+</html>
