@@ -347,6 +347,10 @@ button {
   position: relative;
 }
 
+.fallback-map.is-hidden {
+  display: none;
+}
+
 .map-pin {
   background: var(--teal);
   border: 3px solid #fff;
@@ -469,6 +473,13 @@ button {
   text-align: left;
   top: -10px;
   z-index: 20;
+}
+
+.kakao-marker-tooltip::before {
+  content: "";
+  inset: -8px;
+  position: absolute;
+  z-index: -1;
 }
 
 .kakao-marker-tooltip strong {

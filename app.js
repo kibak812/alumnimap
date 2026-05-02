@@ -298,10 +298,12 @@ function renderSelectedGroup(group) {
 
 function renderMap(filtered) {
   if (kakaoMap && window.kakao?.maps) {
+    elements.fallbackMap.classList.add("is-hidden");
     renderKakaoMarkers(filtered);
     return;
   }
 
+  elements.fallbackMap.classList.remove("is-hidden");
   const groups = groupPeople(filtered);
   elements.fallbackMap.innerHTML = groups
     .map((group, index) => {
@@ -360,6 +362,8 @@ function loadKakaoMap(key) {
 }
 
 function initializeKakaoMap() {
+  elements.fallbackMap.classList.add("is-hidden");
+  elements.fallbackMap.innerHTML = "";
   const center = new kakao.maps.LatLng(37.566826, 126.9786567);
   kakaoMap = new kakao.maps.Map($("#map"), { center, level: 8 });
   geocoder = new kakao.maps.services.Geocoder();
