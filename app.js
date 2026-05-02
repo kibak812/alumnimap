@@ -46,7 +46,10 @@ const $ = (selector) => document.querySelector(selector);
 
 const elements = {
   apiKey: $("#apiKey"),
+  apiEditor: $("#apiEditor"),
+  apiState: $("#apiState"),
   saveKey: $("#saveKey"),
+  toggleKey: $("#toggleKey"),
   countText: $("#countText"),
   searchInput: $("#searchInput"),
   peopleList: $("#peopleList"),
@@ -62,7 +65,10 @@ const elements = {
   resetData: $("#resetData"),
 };
 
-elements.apiKey.value = localStorage.getItem(KAKAO_KEY) ?? "";
+const savedKakaoKey = localStorage.getItem(KAKAO_KEY) ?? "";
+elements.apiKey.value = savedKakaoKey;
+setApiEditorOpen(!savedKakaoKey);
+setApiState(savedKakaoKey ? "Kakao Maps 키 저장됨" : "Kakao Maps 설정 필요");
 
 elements.saveKey.addEventListener("click", () => {
   const key = elements.apiKey.value.trim();
@@ -76,7 +82,13 @@ elements.saveKey.addEventListener("click", () => {
     return;
   }
   localStorage.setItem(KAKAO_KEY, key);
+  setApiEditorOpen(false);
+  setApiState("Kakao Maps 연결 중...");
   loadKakaoMap(key);
+});
+
+elements.toggleKey.addEventListener("click", () => {
+  setApiEditorOpen(elements.apiEditor.classList.contains("is-hidden"));
 });
 
 elements.searchInput.addEventListener("input", render);
@@ -258,6 +270,8 @@ function initializeKakaoMap() {
   kakaoMap = new kakao.maps.Map($("#map"), { center, level: 8 });
   geocoder = new kakao.maps.services.Geocoder();
   elements.mapStatus.textContent = "Kakao Maps 연결됨";
+  setApiState("Kakao Maps 연결됨");
+  setApiEditorOpen(false);
   render();
   fitAllMarkers();
 }
@@ -323,6 +337,15 @@ function setMessage(message) {
   elements.formMessage.textContent = message;
 }
 
+function setApiState(message) {
+  elements.apiState.textContent = message;
+}
+
+function setApiEditorOpen(isOpen) {
+  elements.apiEditor.classList.toggle("is-hidden", !isOpen);
+  elements.toggleKey.textContent = isOpen ? "닫기" : "설정";
+}
+
 function escapeHtml(value) {
   return String(value)
     .replaceAll("&", "&amp;")
@@ -334,9 +357,8 @@ function escapeHtml(value) {
 
 render();
 
-const savedKey = localStorage.getItem(KAKAO_KEY);
-if (savedKey && location.protocol !== "file:") {
-  loadKakaoMap(savedKey);
+if (savedKakaoKey && location.protocol !== "file:") {
+  loadKakaoMap(savedKakaoKey);
 } else if (location.protocol === "file:") {
   elements.mapStatus.textContent = "API 키 미적용: file:// 데모 지도 사용 중";
 }

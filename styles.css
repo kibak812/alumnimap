@@ -89,6 +89,27 @@ h1 {
   min-width: 340px;
 }
 
+.api-summary {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.api-summary span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.api-editor {
+  margin-top: 8px;
+}
+
+.api-editor.is-hidden {
+  display: none;
+}
+
 .api-control label,
 .entry-form label span,
 .section-label {
@@ -454,6 +475,10 @@ button {
 
   .api-control {
     min-width: 0;
+  }
+
+  .api-summary {
+    justify-content: space-between;
   }
 
   .workspace {

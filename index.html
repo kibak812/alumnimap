@@ -17,12 +17,18 @@
           </div>
         </div>
         <div class="api-control">
-          <label for="apiKey">Kakao JavaScript 키</label>
-          <div class="api-row">
-            <input id="apiKey" type="password" placeholder="Kakao JavaScript 키 입력" autocomplete="off" />
-            <button id="saveKey" class="ghost-button" type="button">적용</button>
+          <div class="api-summary">
+            <span id="apiState">Kakao Maps 설정 필요</span>
+            <button id="toggleKey" class="ghost-button" type="button">설정</button>
           </div>
-          <p class="api-help">키를 적용하면 실제 Kakao Maps 지도로 전환됩니다.</p>
+          <div id="apiEditor" class="api-editor">
+            <label for="apiKey">Kakao JavaScript 키</label>
+            <div class="api-row">
+              <input id="apiKey" type="password" placeholder="Kakao JavaScript 키 입력" autocomplete="off" />
+              <button id="saveKey" class="ghost-button" type="button">적용</button>
+            </div>
+            <p class="api-help">키를 적용하면 실제 Kakao Maps 지도로 전환됩니다.</p>
+          </div>
         </div>
       </header>
 
