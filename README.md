@@ -29,6 +29,23 @@ python -m http.server 8080
 
 그다음 `http://localhost:8080`을 Kakao Developers의 Web 플랫폼에 등록하고, 브라우저에서 `http://localhost:8080`으로 접속해 테스트합니다.
 
+## 문제 해결
+
+`domain mismatched! caller=https://kibak812.github.io` 오류가 나오면 Kakao Developers가 현재 페이지를 `https://kibak812.github.io` 도메인에서 온 요청으로 보고 있다는 뜻입니다.
+
+해당 JavaScript 키가 속한 앱에서 아래 값을 정확히 등록합니다.
+
+```text
+https://kibak812.github.io
+```
+
+주의할 점:
+
+- `http://kibak812.github.io`가 아니라 `https://kibak812.github.io`입니다.
+- `https://kibak812.github.io/alumnimap/`처럼 경로까지 넣는 것이 아니라 도메인만 등록합니다.
+- GitHub 저장소 주소인 `https://github.com/kibak812/alumnimap`가 아닙니다.
+- JavaScript 키를 발급한 앱과 도메인을 등록한 앱이 같은지 확인합니다.
+
 ## 포함 기능
 
 - 동기 목록 검색
