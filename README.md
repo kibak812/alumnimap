@@ -12,7 +12,10 @@
 2. 플랫폼 Web에 이 앱을 실행할 도메인을 등록합니다.
    - GitHub Pages 배포 주소는 `https://kibak812.github.io`를 등록합니다.
    - 로컬 테스트는 `file://`가 아니라 웹 서버 주소를 등록해야 합니다. 예: `http://localhost:8080`
-3. 앱 우측 상단의 `Kakao JavaScript 키`에 키를 입력하고 `적용`을 누릅니다.
+3. 제품 설정의 카카오맵 사용 상태를 켭니다.
+   - Kakao Developers > 내 애플리케이션 > 앱 선택 > 제품 설정 > 카카오맵 > 활성화 설정 > 상태 `ON`
+   - `disabled OPEN_MAP_AND_LOCAL service` 오류가 나오면 이 설정이 꺼져 있거나 해당 앱에 카카오맵 권한이 없는 상태입니다.
+4. 앱 우측 상단의 `Kakao JavaScript 키`에 키를 입력하고 `적용`을 누릅니다.
 
 Kakao 키가 없으면 데모 지도 모드로 동작하며, 등록 데이터는 브라우저 `localStorage`에 저장됩니다.
 

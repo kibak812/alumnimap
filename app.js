@@ -241,14 +241,14 @@ function loadKakaoMap(key) {
   script.onload = () => window.kakao.maps.load(initializeKakaoMap);
   script.onerror = () => {
     elements.mapStatus.textContent = "Kakao Maps 연결 실패";
-    setMessage("카카오 지도 스크립트를 불러오지 못했습니다. JavaScript 키와 사이트 도메인 등록을 확인해 주세요.");
+    setMessage("카카오 지도 스크립트를 불러오지 못했습니다. JavaScript 키, 사이트 도메인, 카카오맵 활성화 상태를 확인해 주세요.");
   };
   document.head.appendChild(script);
 
   window.setTimeout(() => {
     if (!kakaoMap) {
       elements.mapStatus.textContent = "Kakao Maps 연결 대기 중";
-      setMessage("지도가 계속 뜨지 않으면 Kakao Developers의 Web 플랫폼에 현재 사이트 도메인이 등록되어 있는지 확인해 주세요.");
+      setMessage("지도가 계속 뜨지 않으면 Kakao Developers의 Web 플랫폼 도메인과 제품 설정 > 카카오맵 활성화 상태를 확인해 주세요.");
     }
   }, 5000);
 }
