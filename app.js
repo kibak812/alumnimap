@@ -70,6 +70,11 @@ elements.saveKey.addEventListener("click", () => {
     setMessage("JavaScript 키를 입력하면 실제 카카오 지도를 불러옵니다.");
     return;
   }
+  if (location.protocol === "file:") {
+    setMessage("file://로 연 화면에서는 Kakao Maps 인증이 실패합니다. GitHub Pages 주소나 등록된 localhost 주소에서 열어 주세요.");
+    elements.mapStatus.textContent = "file://에서는 Kakao Maps를 불러올 수 없습니다";
+    return;
+  }
   localStorage.setItem(KAKAO_KEY, key);
   loadKakaoMap(key);
 });
@@ -229,11 +234,23 @@ function loadKakaoMap(key) {
     return;
   }
 
+  elements.mapStatus.textContent = "Kakao Maps 불러오는 중...";
+
   const script = document.createElement("script");
   script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${encodeURIComponent(key)}&libraries=services&autoload=false`;
   script.onload = () => window.kakao.maps.load(initializeKakaoMap);
-  script.onerror = () => setMessage("카카오 지도 스크립트를 불러오지 못했습니다. 키와 도메인 등록을 확인해 주세요.");
+  script.onerror = () => {
+    elements.mapStatus.textContent = "Kakao Maps 연결 실패";
+    setMessage("카카오 지도 스크립트를 불러오지 못했습니다. JavaScript 키와 사이트 도메인 등록을 확인해 주세요.");
+  };
   document.head.appendChild(script);
+
+  window.setTimeout(() => {
+    if (!kakaoMap) {
+      elements.mapStatus.textContent = "Kakao Maps 연결 대기 중";
+      setMessage("지도가 계속 뜨지 않으면 Kakao Developers의 Web 플랫폼에 현재 사이트 도메인이 등록되어 있는지 확인해 주세요.");
+    }
+  }, 5000);
 }
 
 function initializeKakaoMap() {
@@ -318,4 +335,8 @@ function escapeHtml(value) {
 render();
 
 const savedKey = localStorage.getItem(KAKAO_KEY);
-if (savedKey) loadKakaoMap(savedKey);
+if (savedKey && location.protocol !== "file:") {
+  loadKakaoMap(savedKey);
+} else if (location.protocol === "file:") {
+  elements.mapStatus.textContent = "API 키 미적용: file:// 데모 지도 사용 중";
+}

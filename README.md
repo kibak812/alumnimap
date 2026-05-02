@@ -10,11 +10,21 @@
 
 1. [Kakao Developers](https://developers.kakao.com/)에서 앱을 만들고 JavaScript 키를 발급합니다.
 2. 플랫폼 Web에 이 앱을 실행할 도메인을 등록합니다.
-   - 로컬 파일로만 열 때는 카카오 지도 SDK 정책상 동작이 제한될 수 있습니다.
-   - 실제 사용은 간단한 정적 호스팅이나 로컬 서버 도메인 등록을 권장합니다.
+   - GitHub Pages 배포 주소는 `https://kibak812.github.io`를 등록합니다.
+   - 로컬 테스트는 `file://`가 아니라 웹 서버 주소를 등록해야 합니다. 예: `http://localhost:8080`
 3. 앱 우측 상단의 `Kakao JavaScript 키`에 키를 입력하고 `적용`을 누릅니다.
 
 Kakao 키가 없으면 데모 지도 모드로 동작하며, 등록 데이터는 브라우저 `localStorage`에 저장됩니다.
+
+## 로컬에서 실제 Kakao Maps 테스트
+
+Kakao Maps JavaScript SDK는 등록된 사이트 도메인에서만 동작합니다. `index.html`을 직접 열어 `file://` 주소로 실행하면 실제 지도가 로드되지 않습니다.
+
+```powershell
+python -m http.server 8080
+```
+
+그다음 `http://localhost:8080`을 Kakao Developers의 Web 플랫폼에 등록하고, 브라우저에서 `http://localhost:8080`으로 접속해 테스트합니다.
 
 ## 포함 기능
 
