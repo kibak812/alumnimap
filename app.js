@@ -379,6 +379,7 @@ function renderKakaoMarkers(filtered) {
       const content = createKakaoGroupMarker(group);
       const overlay = new kakao.maps.CustomOverlay({
         content,
+        clickable: true,
         map: kakaoMap,
         position,
         yAnchor: 1,
@@ -403,61 +404,20 @@ function createKakaoGroupMarker(group) {
   const names = group.people.map((person) => person.name).join(", ");
   const button = document.createElement("button");
   button.type = "button";
+  button.className = `kakao-marker ${isCluster ? "is-cluster" : ""}`;
   button.setAttribute("aria-label", `${group.company} 근무자 ${group.people.length}명`);
-  button.style.cssText = [
-    "position:relative",
-    "width:38px",
-    "height:38px",
-    "border:3px solid #fff",
-    "border-radius:999px 999px 999px 0",
-    "background:" + (isCluster ? "#e56f55" : "#157f72"),
-    "box-shadow:0 12px 24px rgba(18,64,58,.24)",
-    "color:#fff",
-    "font:800 12px Pretendard,Noto Sans KR,sans-serif",
-    "cursor:pointer",
-    "transform:rotate(-45deg)",
-  ].join(";");
 
+  const pin = document.createElement("span");
+  pin.className = "kakao-marker-pin";
   const text = document.createElement("span");
   text.textContent = label;
-  text.style.cssText = "display:block;transform:rotate(45deg);";
-  button.append(text);
+  pin.append(text);
+  button.append(pin);
 
   const tooltip = document.createElement("span");
-  tooltip.innerHTML = `<strong>${escapeHtml(group.company)}</strong><br>${escapeHtml(names)}`;
-  tooltip.style.cssText = [
-    "display:none",
-    "position:absolute",
-    "left:24px",
-    "top:-10px",
-    "min-width:150px",
-    "max-width:230px",
-    "padding:9px 10px",
-    "border:1px solid #dfe5e1",
-    "border-radius:8px",
-    "background:#fff",
-    "box-shadow:0 14px 28px rgba(31,41,36,.16)",
-    "color:#202522",
-    "font:700 12px Pretendard,Noto Sans KR,sans-serif",
-    "line-height:1.45",
-    "text-align:left",
-    "transform:rotate(45deg)",
-    "z-index:10",
-  ].join(";");
+  tooltip.className = "kakao-marker-tooltip";
+  tooltip.innerHTML = `<strong>${escapeHtml(group.company)}</strong><span>${escapeHtml(names)}</span>`;
   button.append(tooltip);
-
-  button.addEventListener("mouseenter", () => {
-    tooltip.style.display = "block";
-  });
-  button.addEventListener("mouseleave", () => {
-    tooltip.style.display = "none";
-  });
-  button.addEventListener("focus", () => {
-    tooltip.style.display = "block";
-  });
-  button.addEventListener("blur", () => {
-    tooltip.style.display = "none";
-  });
 
   return button;
 }
@@ -465,7 +425,11 @@ function createKakaoGroupMarker(group) {
 function groupPeople(list) {
   const groups = new Map();
   list.forEach((person) => {
-    const key = `${normalizeKey(person.company)}|${normalizeKey(person.address)}`;
+    const locationKey =
+      Number.isFinite(person.lat) && Number.isFinite(person.lng)
+        ? `${person.lat.toFixed(5)},${person.lng.toFixed(5)}`
+        : normalizeKey(person.address);
+    const key = `${normalizeKey(person.company)}|${locationKey}`;
     if (!groups.has(key)) {
       groups.set(key, {
         key,

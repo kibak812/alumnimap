@@ -413,6 +413,80 @@ button {
   transform: translateY(0);
 }
 
+.kakao-marker {
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  height: 46px;
+  padding: 0;
+  position: relative;
+  width: 46px;
+}
+
+.kakao-marker-pin {
+  align-items: center;
+  background: var(--teal);
+  border: 3px solid #fff;
+  border-radius: 999px 999px 999px 0;
+  box-shadow: 0 12px 24px rgba(18, 64, 58, 0.24);
+  color: #fff;
+  display: flex;
+  font-size: 12px;
+  font-weight: 800;
+  height: 38px;
+  justify-content: center;
+  left: 4px;
+  position: absolute;
+  top: 0;
+  transform: rotate(-45deg);
+  width: 38px;
+}
+
+.kakao-marker-pin span {
+  transform: rotate(45deg);
+}
+
+.kakao-marker.is-cluster .kakao-marker-pin {
+  background: var(--coral);
+  box-shadow: 0 12px 24px rgba(229, 111, 85, 0.28);
+}
+
+.kakao-marker-tooltip {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 14px 28px rgba(31, 41, 36, 0.16);
+  color: var(--text);
+  display: none;
+  font-size: 12px;
+  font-weight: 700;
+  left: 36px;
+  line-height: 1.45;
+  max-width: 230px;
+  min-width: 150px;
+  padding: 9px 10px;
+  position: absolute;
+  text-align: left;
+  top: -10px;
+  z-index: 20;
+}
+
+.kakao-marker-tooltip strong {
+  display: block;
+  font-size: 13px;
+}
+
+.kakao-marker-tooltip span {
+  color: var(--muted);
+  display: block;
+  margin-top: 3px;
+}
+
+.kakao-marker:hover .kakao-marker-tooltip,
+.kakao-marker:focus-visible .kakao-marker-tooltip {
+  display: block;
+}
+
 .map-label {
   background: #fff;
   border: 1px solid var(--line);
