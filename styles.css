@@ -445,6 +445,20 @@ button {
   gap: 7px;
 }
 
+.form-actions {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 1fr auto;
+}
+
+.form-actions .ghost-button {
+  min-width: 76px;
+}
+
+.is-hidden {
+  display: none;
+}
+
 .form-message {
   color: var(--teal-dark);
   font-size: 12px;

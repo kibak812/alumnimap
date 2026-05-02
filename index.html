@@ -82,7 +82,10 @@
               <span>주소</span>
               <input id="addressInput" name="address" required placeholder="예: 경기도 성남시 분당구 판교역로 166" />
             </label>
-            <button class="primary-button" type="submit">등록</button>
+            <div class="form-actions">
+              <button id="submitPerson" class="primary-button" type="submit">등록</button>
+              <button id="cancelEdit" class="ghost-button is-hidden" type="button">취소</button>
+            </div>
             <p id="formMessage" class="form-message" role="status"></p>
           </form>
         </aside>

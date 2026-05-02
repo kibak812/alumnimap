@@ -39,6 +39,7 @@ const samplePeople = [
 
 let people = loadPeople();
 let selectedId = people[0]?.id ?? null;
+let editingId = null;
 let kakaoMap = null;
 let geocoder = null;
 let markers = [];
@@ -59,6 +60,8 @@ const elements = {
   fitAll: $("#fitAll"),
   selectedPerson: $("#selectedPerson"),
   form: $("#personForm"),
+  submitPerson: $("#submitPerson"),
+  cancelEdit: $("#cancelEdit"),
   nameInput: $("#nameInput"),
   companyInput: $("#companyInput"),
   addressInput: $("#addressInput"),
@@ -104,7 +107,7 @@ elements.resetData.addEventListener("click", () => {
 elements.form.addEventListener("submit", async (event) => {
   event.preventDefault();
   const person = {
-    id: crypto.randomUUID(),
+    id: editingId ?? crypto.randomUUID(),
     name: elements.nameInput.value.trim(),
     company: elements.companyInput.value.trim(),
     address: elements.addressInput.value.trim(),
@@ -115,15 +118,29 @@ elements.form.addEventListener("submit", async (event) => {
     return;
   }
 
-  setMessage("주소를 좌표로 변환하는 중입니다...");
+  setMessage(editingId ? "수정한 주소를 좌표로 변환하는 중입니다..." : "주소를 좌표로 변환하는 중입니다...");
   const coords = await geocodeAddress(person.address);
   const nextPerson = { ...person, ...coords };
-  people = [nextPerson, ...people];
+  if (editingId) {
+    people = people.map((item) => (item.id === editingId ? nextPerson : item));
+  } else {
+    people = [nextPerson, ...people];
+  }
   selectedId = nextPerson.id;
+  const wasEditing = Boolean(editingId);
+  editingId = null;
   persistPeople();
   elements.form.reset();
-  setMessage(`${person.name}님의 직장 위치를 등록했습니다.`);
+  setFormMode();
+  setMessage(`${person.name}님의 직장 위치를 ${wasEditing ? "수정" : "등록"}했습니다.`);
   render();
+});
+
+elements.cancelEdit.addEventListener("click", () => {
+  editingId = null;
+  elements.form.reset();
+  setFormMode();
+  setMessage("수정을 취소했습니다.");
 });
 
 function loadPeople() {
@@ -201,10 +218,15 @@ function renderSelected() {
     <p class="company">${escapeHtml(person.company)}</p>
     <p>${escapeHtml(person.address)}</p>
     <div class="selected-actions">
+      <button class="ghost-button" id="editPerson" type="button">수정</button>
       <button class="ghost-button" id="copyAddress" type="button">주소 복사</button>
       <button class="ghost-button" id="removePerson" type="button">삭제</button>
     </div>
   `;
+
+  $("#editPerson").addEventListener("click", () => {
+    startEdit(person);
+  });
 
   $("#copyAddress").addEventListener("click", async () => {
     await navigator.clipboard?.writeText(person.address);
@@ -214,6 +236,11 @@ function renderSelected() {
   $("#removePerson").addEventListener("click", () => {
     people = people.filter((item) => item.id !== person.id);
     selectedId = people[0]?.id ?? null;
+    if (editingId === person.id) {
+      editingId = null;
+      elements.form.reset();
+      setFormMode();
+    }
     persistPeople();
     setMessage(`${person.name}님을 목록에서 삭제했습니다.`);
     render();
@@ -342,6 +369,24 @@ function fallbackCoords(seed) {
 
 function setMessage(message) {
   elements.formMessage.textContent = message;
+}
+
+function startEdit(person) {
+  editingId = person.id;
+  selectedId = person.id;
+  elements.nameInput.value = person.name;
+  elements.companyInput.value = person.company;
+  elements.addressInput.value = person.address;
+  setFormMode();
+  setMessage(`${person.name}님의 정보를 수정 중입니다.`);
+  render();
+  elements.nameInput.focus();
+}
+
+function setFormMode() {
+  const isEditing = Boolean(editingId);
+  elements.submitPerson.textContent = isEditing ? "수정 저장" : "등록";
+  elements.cancelEdit.classList.toggle("is-hidden", !isEditing);
 }
 
 function setApiState(message) {
