@@ -13,6 +13,14 @@ const samplePeople = [
   },
   {
     id: crypto.randomUUID(),
+    name: "한기태",
+    company: "카카오",
+    address: "경기도 성남시 분당구 판교역로 166",
+    lat: 37.395021,
+    lng: 127.110556,
+  },
+  {
+    id: crypto.randomUUID(),
     name: "이서연",
     company: "서울대학교병원",
     address: "서울특별시 종로구 대학로 101",
@@ -39,6 +47,7 @@ const samplePeople = [
 
 let people = loadPeople();
 let selectedId = people[0]?.id ?? null;
+let selectedGroupKey = null;
 let editingId = null;
 let kakaoMap = null;
 let geocoder = null;
@@ -212,6 +221,12 @@ function renderSelected() {
     return;
   }
 
+  const selectedGroup = selectedGroupKey ? groupPeople(people).find((group) => group.key === selectedGroupKey) : null;
+  if (selectedGroup && selectedGroup.people.length > 1) {
+    renderSelectedGroup(selectedGroup);
+    return;
+  }
+
   elements.selectedPerson.innerHTML = `
     <span class="section-label">지도에서 보기</span>
     <h2>${escapeHtml(person.name)}</h2>
@@ -225,6 +240,7 @@ function renderSelected() {
   `;
 
   $("#editPerson").addEventListener("click", () => {
+    selectedGroupKey = null;
     startEdit(person);
   });
 
@@ -234,8 +250,11 @@ function renderSelected() {
   });
 
   $("#removePerson").addEventListener("click", () => {
+    const confirmed = window.confirm(`${person.name}님을 목록에서 삭제할까요? 이 작업은 이 브라우저에 저장된 데이터를 변경합니다.`);
+    if (!confirmed) return;
     people = people.filter((item) => item.id !== person.id);
     selectedId = people[0]?.id ?? null;
+    selectedGroupKey = null;
     if (editingId === person.id) {
       editingId = null;
       elements.form.reset();
@@ -247,28 +266,69 @@ function renderSelected() {
   });
 }
 
+function renderSelectedGroup(group) {
+  elements.selectedPerson.innerHTML = `
+    <span class="section-label">지도에서 보기</span>
+    <h2>${escapeHtml(group.company)}</h2>
+    <p class="company">근무 중인 동기 ${group.people.length}명</p>
+    <p>${escapeHtml(group.address)}</p>
+    <div class="group-list">
+      ${group.people
+        .map(
+          (person) => `
+            <button class="group-person" type="button" data-id="${person.id}">
+              <strong>${escapeHtml(person.name)}</strong>
+              <span>상세 보기</span>
+            </button>
+          `,
+        )
+        .join("")}
+    </div>
+  `;
+
+  elements.selectedPerson.querySelectorAll(".group-person").forEach((button) => {
+    button.addEventListener("click", () => {
+      selectedId = button.dataset.id;
+      selectedGroupKey = null;
+      render();
+      focusSelectedMarker();
+    });
+  });
+}
+
 function renderMap(filtered) {
   if (kakaoMap && window.kakao?.maps) {
     renderKakaoMarkers(filtered);
     return;
   }
 
-  elements.fallbackMap.innerHTML = filtered
-    .map((person, index) => {
+  const groups = groupPeople(filtered);
+  elements.fallbackMap.innerHTML = groups
+    .map((group, index) => {
       const x = 16 + ((index * 23 + 11) % 68);
       const y = 15 + ((index * 31 + 8) % 66);
+      const isCluster = group.people.length > 1;
+      const label = isCluster ? group.people.length : group.people[0].name.slice(0, 1);
+      const names = group.people.map((person) => person.name).join(", ");
       return `
-        <button class="map-pin" style="--x: ${x}%; --y: ${y}%;" data-id="${person.id}" aria-label="${escapeHtml(person.name)} 위치">
-          <span>${escapeHtml(person.name.slice(0, 1))}</span>
+        <button class="map-pin ${isCluster ? "is-cluster" : ""}" style="--x: ${x}%; --y: ${y}%;" data-key="${escapeHtml(group.key)}" aria-label="${escapeHtml(group.company)} 근무자 ${group.people.length}명">
+          <span>${escapeHtml(label)}</span>
         </button>
-        <span class="map-label" style="--x: ${x}%; --y: ${y}%;">${escapeHtml(person.company)}</span>
+        <div class="map-pin-tooltip" style="--x: ${x}%; --y: ${y}%;">
+          <strong>${escapeHtml(group.company)}</strong>
+          <span>${escapeHtml(names)}</span>
+        </div>
+        <span class="map-label" style="--x: ${x}%; --y: ${y}%;">${escapeHtml(group.company)}</span>
       `;
     })
     .join("");
 
   elements.fallbackMap.querySelectorAll(".map-pin").forEach((pin) => {
     pin.addEventListener("click", () => {
-      selectedId = pin.dataset.id;
+      const group = groups.find((item) => item.key === pin.dataset.key);
+      if (!group) return;
+      selectedGroupKey = group.key;
+      selectedId = group.people[0].id;
       render();
     });
   });
@@ -312,20 +372,117 @@ function initializeKakaoMap() {
 
 function renderKakaoMarkers(filtered) {
   markers.forEach((marker) => marker.setMap(null));
-  markers = filtered
-    .filter((person) => Number.isFinite(person.lat) && Number.isFinite(person.lng))
-    .map((person) => {
-      const marker = new kakao.maps.Marker({
+  markers = groupPeople(filtered)
+    .filter((group) => Number.isFinite(group.lat) && Number.isFinite(group.lng))
+    .map((group) => {
+      const position = new kakao.maps.LatLng(group.lat, group.lng);
+      const content = createKakaoGroupMarker(group);
+      const overlay = new kakao.maps.CustomOverlay({
+        content,
         map: kakaoMap,
-        position: new kakao.maps.LatLng(person.lat, person.lng),
-        title: `${person.name} - ${person.company}`,
+        position,
+        yAnchor: 1,
       });
-      kakao.maps.event.addListener(marker, "click", () => {
-        selectedId = person.id;
+
+      content.addEventListener("click", () => {
+        selectedGroupKey = group.key;
+        selectedId = group.people[0].id;
         render();
       });
-      return marker;
+
+      return {
+        getPosition: () => position,
+        setMap: (map) => overlay.setMap(map),
+      };
     });
+}
+
+function createKakaoGroupMarker(group) {
+  const isCluster = group.people.length > 1;
+  const label = isCluster ? group.people.length : group.people[0].name.slice(0, 1);
+  const names = group.people.map((person) => person.name).join(", ");
+  const button = document.createElement("button");
+  button.type = "button";
+  button.setAttribute("aria-label", `${group.company} 근무자 ${group.people.length}명`);
+  button.style.cssText = [
+    "position:relative",
+    "width:38px",
+    "height:38px",
+    "border:3px solid #fff",
+    "border-radius:999px 999px 999px 0",
+    "background:" + (isCluster ? "#e56f55" : "#157f72"),
+    "box-shadow:0 12px 24px rgba(18,64,58,.24)",
+    "color:#fff",
+    "font:800 12px Pretendard,Noto Sans KR,sans-serif",
+    "cursor:pointer",
+    "transform:rotate(-45deg)",
+  ].join(";");
+
+  const text = document.createElement("span");
+  text.textContent = label;
+  text.style.cssText = "display:block;transform:rotate(45deg);";
+  button.append(text);
+
+  const tooltip = document.createElement("span");
+  tooltip.innerHTML = `<strong>${escapeHtml(group.company)}</strong><br>${escapeHtml(names)}`;
+  tooltip.style.cssText = [
+    "display:none",
+    "position:absolute",
+    "left:24px",
+    "top:-10px",
+    "min-width:150px",
+    "max-width:230px",
+    "padding:9px 10px",
+    "border:1px solid #dfe5e1",
+    "border-radius:8px",
+    "background:#fff",
+    "box-shadow:0 14px 28px rgba(31,41,36,.16)",
+    "color:#202522",
+    "font:700 12px Pretendard,Noto Sans KR,sans-serif",
+    "line-height:1.45",
+    "text-align:left",
+    "transform:rotate(45deg)",
+    "z-index:10",
+  ].join(";");
+  button.append(tooltip);
+
+  button.addEventListener("mouseenter", () => {
+    tooltip.style.display = "block";
+  });
+  button.addEventListener("mouseleave", () => {
+    tooltip.style.display = "none";
+  });
+  button.addEventListener("focus", () => {
+    tooltip.style.display = "block";
+  });
+  button.addEventListener("blur", () => {
+    tooltip.style.display = "none";
+  });
+
+  return button;
+}
+
+function groupPeople(list) {
+  const groups = new Map();
+  list.forEach((person) => {
+    const key = `${normalizeKey(person.company)}|${normalizeKey(person.address)}`;
+    if (!groups.has(key)) {
+      groups.set(key, {
+        key,
+        company: person.company,
+        address: person.address,
+        lat: person.lat,
+        lng: person.lng,
+        people: [],
+      });
+    }
+    groups.get(key).people.push(person);
+  });
+  return [...groups.values()];
+}
+
+function normalizeKey(value) {
+  return String(value).trim().replace(/\s+/g, " ").toLowerCase();
 }
 
 function fitAllMarkers() {
