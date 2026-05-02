@@ -1,4 +1,5 @@
 const STORAGE_KEY = "grad-work-map.people";
+const SEEDED_KEY = "grad-work-map.seeded";
 const KAKAO_KEY = "grad-work-map.kakao-key";
 
 const samplePeople = [
@@ -127,15 +128,21 @@ elements.form.addEventListener("submit", async (event) => {
 
 function loadPeople() {
   const saved = localStorage.getItem(STORAGE_KEY);
-  if (!saved) return samplePeople;
+  if (!saved) {
+    if (localStorage.getItem(SEEDED_KEY)) return [];
+    localStorage.setItem(SEEDED_KEY, "true");
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(samplePeople));
+    return samplePeople;
+  }
   try {
     return JSON.parse(saved);
   } catch {
-    return samplePeople;
+    return [];
   }
 }
 
 function persistPeople() {
+  localStorage.setItem(SEEDED_KEY, "true");
   localStorage.setItem(STORAGE_KEY, JSON.stringify(people));
 }
 
